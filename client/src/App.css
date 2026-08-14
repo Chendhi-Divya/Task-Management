@@ -250,6 +250,12 @@ button {
 }
 
 
+.task-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 /* Navbar right */
 
 .navbar-right {
@@ -848,4 +854,63 @@ button {
   .filter {
     white-space: nowrap;
   }
+}
+
+.create-task-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.create-task-form {
+  width: 420px;
+  max-width: 90%;
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.create-task-form h2 {
+  margin-bottom: 20px;
+}
+
+.create-task-form input,
+.create-task-form textarea,
+.create-task-form select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.create-task-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.create-task-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.create-task-actions button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.create-task-actions button[type="submit"] {
+  background: #2f2f2f;
+  color: white;
 }

@@ -18,12 +18,7 @@ function Sidebar() {
           <span>📝</span>
           My Tasks
         </button>
-
-        <button className="sidebar-item">
-          <span>⭐</span>
-          Favorites
-        </button>
-
+        
         <button className="sidebar-item">
           <span>📅</span>
           Calendar

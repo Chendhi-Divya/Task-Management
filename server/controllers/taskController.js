@@ -1,30 +1,23 @@
-const Task = require("../models/Task");
+const Task = require("../models/task");
 
 // CREATE TASK
 const createTask = async (req, res) => {
   try {
     const { title, description, priority, dueDate } = req.body;
 
-    if (!title) {
-      return res.status(400).json({
-        message: "Title is required",
-      });
-    }
-
     const task = await Task.create({
       title,
       description,
       priority,
       dueDate,
-      user: req.user._id,
+      user: req.user.id,
     });
 
     res.status(201).json(task);
   } catch (error) {
-    console.error("Create task error:", error);
-
     res.status(500).json({
       message: "Failed to create task",
+      error: error.message,
     });
   }
 };
@@ -33,15 +26,14 @@ const createTask = async (req, res) => {
 const getTasks = async (req, res) => {
   try {
     const tasks = await Task.find({
-      user: req.user._id,
+      user: req.user.id,
     }).sort({ createdAt: -1 });
 
     res.status(200).json(tasks);
   } catch (error) {
-    console.error("Get tasks error:", error);
-
     res.status(500).json({
       message: "Failed to fetch tasks",
+      error: error.message,
     });
   }
 };
@@ -51,7 +43,7 @@ const getTask = async (req, res) => {
   try {
     const task = await Task.findOne({
       _id: req.params.id,
-      user: req.user._id,
+      user: req.user.id,
     });
 
     if (!task) {
@@ -62,10 +54,9 @@ const getTask = async (req, res) => {
 
     res.status(200).json(task);
   } catch (error) {
-    console.error("Get task error:", error);
-
     res.status(500).json({
       message: "Failed to fetch task",
+      error: error.message,
     });
   }
 };
@@ -73,20 +64,12 @@ const getTask = async (req, res) => {
 // UPDATE TASK
 const updateTask = async (req, res) => {
   try {
-    const { title, description, completed, priority, dueDate } = req.body;
-
     const task = await Task.findOneAndUpdate(
       {
         _id: req.params.id,
-        user: req.user._id,
+        user: req.user.id,
       },
-      {
-        title,
-        description,
-        completed,
-        priority,
-        dueDate,
-      },
+      req.body,
       {
         new: true,
         runValidators: true,
@@ -101,10 +84,9 @@ const updateTask = async (req, res) => {
 
     res.status(200).json(task);
   } catch (error) {
-    console.error("Update task error:", error);
-
     res.status(500).json({
       message: "Failed to update task",
+      error: error.message,
     });
   }
 };
@@ -114,7 +96,7 @@ const deleteTask = async (req, res) => {
   try {
     const task = await Task.findOneAndDelete({
       _id: req.params.id,
-      user: req.user._id,
+      user: req.user.id,
     });
 
     if (!task) {
@@ -127,10 +109,9 @@ const deleteTask = async (req, res) => {
       message: "Task deleted successfully",
     });
   } catch (error) {
-    console.error("Delete task error:", error);
-
     res.status(500).json({
       message: "Failed to delete task",
+      error: error.message,
     });
   }
 };

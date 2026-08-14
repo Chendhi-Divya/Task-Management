@@ -1,6 +1,11 @@
 import React from "react";
 
-function TaskRow({ task, onToggle, onDelete }) {
+function TaskRow({
+  task,
+  onToggle,
+  onDelete,
+  onEdit,
+}) {
   return (
     <div className="task-row">
 
@@ -39,23 +44,37 @@ function TaskRow({ task, onToggle, onDelete }) {
       </div>
 
       <div className="task-status">
-        {task.completed ? "Completed" : "Active"}
+        {task.completed
+          ? "Completed"
+          : "Active"}
       </div>
 
       <div className="task-date">
         {task.dueDate
-          ? new Date(task.dueDate).toLocaleDateString()
+          ? new Date(
+              task.dueDate
+            ).toLocaleDateString()
           : "No date"}
       </div>
 
       <div className="task-actions">
-        <button
-          onClick={() => onDelete(task._id)}
-          className="delete-button"
-        >
-          🗑
-        </button>
-      </div>
+
+  <button
+    onClick={() => onEdit(task)}
+    className="edit-button"
+  >
+    Edit
+  </button>
+
+  <button
+    onClick={() => onDelete(task._id)}
+    className="delete-button"
+    title="Delete task"
+  >
+    🗑
+  </button>
+
+</div>
 
     </div>
   );

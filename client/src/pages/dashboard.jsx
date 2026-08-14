@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import api from "../services/api";
+
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import TaskFilters from "../components/TaskFilters";
@@ -6,58 +8,156 @@ import TaskTable from "../components/TaskTable";
 
 function Dashboard() {
   const [filter, setFilter] = useState("all");
+  const [tasks, setTasks] = useState([]);
+  const [showCreateTask, setShowCreateTask] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
 
-  // Temporary task data for UI development.
-  // We will replace this with your backend data during Day 4.
-  const [tasks, setTasks] = useState([
-    {
-      _id: "1",
-      title: "Learn React",
-      description: "Build Notion style frontend",
-      completed: false,
-      priority: "high",
-      dueDate: null,
-    },
-    {
-      _id: "2",
-      title: "Learn Node.js",
-      description: "Understand Express and APIs",
-      completed: false,
-      priority: "medium",
-      dueDate: null,
-    },
-    {
-      _id: "3",
-      title: "Learn MongoDB",
-      description: "Practice MongoDB and Mongoose",
-      completed: true,
-      priority: "low",
-      dueDate: null,
-    },
-  ]);
+  const [newTask, setNewTask] = useState({
+    title: "",
+    description: "",
+    priority: "medium",
+    dueDate: "",
+  });
 
-  // Toggle task completed/uncompleted
-  const handleToggleTask = (id) => {
-    setTasks((previousTasks) =>
-      previousTasks.map((task) =>
-        task._id === id
-          ? {
-              ...task,
-              completed: !task.completed,
-            }
-          : task
-      )
-    );
+  // =========================
+  // FETCH TASKS
+  // =========================
+  const fetchTasks = async () => {
+    try {
+      const response = await api.get("/tasks");
+
+      console.log("✅ Axios connected to backend");
+      console.log("Tasks received from backend:", response.data);
+
+      setTasks(response.data);
+    } catch (error) {
+      console.error("❌ Error fetching tasks:", error);
+
+      if (error.response) {
+        console.error("Status:", error.response.status);
+        console.error("Response:", error.response.data);
+      }
+    }
   };
 
-  // Delete task
-  const handleDeleteTask = (id) => {
-    setTasks((previousTasks) =>
-      previousTasks.filter((task) => task._id !== id)
-    );
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  // =========================
+  // CREATE TASK
+  // =========================
+  const handleCreateTask = async (e) => {
+    e.preventDefault();
+
+    try {
+      await api.post("/tasks", {
+        title: newTask.title,
+        description: newTask.description,
+        priority: newTask.priority,
+        dueDate: newTask.dueDate || null,
+      });
+
+      console.log("✅ Task created successfully");
+
+      await fetchTasks();
+
+      setShowCreateTask(false);
+
+      setNewTask({
+        title: "",
+        description: "",
+        priority: "medium",
+        dueDate: "",
+      });
+    } catch (error) {
+      console.error("❌ Create task error:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to create task"
+      );
+    }
   };
 
-  // Filter tasks
+  // =========================
+  // TOGGLE TASK
+  // =========================
+  const handleToggleTask = async (id) => {
+    try {
+      const task = tasks.find((task) => task._id === id);
+
+      if (!task) return;
+
+      await api.put(`/tasks/${id}`, {
+        completed: !task.completed,
+      });
+
+      console.log("✅ Task status updated");
+
+      await fetchTasks();
+    } catch (error) {
+      console.error("❌ Toggle task error:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to update task"
+      );
+    }
+  };
+
+  // =========================
+  // EDIT TASK
+  // =========================
+  const handleEditTask = async (e) => {
+    e.preventDefault();
+
+    try {
+      await api.put(`/tasks/${editingTask._id}`, {
+        title: editingTask.title,
+        description: editingTask.description,
+        priority: editingTask.priority,
+        dueDate: editingTask.dueDate || null,
+      });
+
+      console.log("✅ Task edited successfully");
+
+      await fetchTasks();
+
+      setEditingTask(null);
+    } catch (error) {
+      console.error("❌ Edit task error:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to update task"
+      );
+    }
+  };
+
+  // =========================
+  // DELETE TASK
+  // =========================
+  const handleDeleteTask = async (id) => {
+    try {
+      await api.delete(`/tasks/${id}`);
+
+      console.log("✅ Task deleted successfully");
+
+      await fetchTasks();
+    } catch (error) {
+      console.error("❌ Delete task error:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to delete task"
+      );
+    }
+  };
+
+  // =========================
+  // FILTER TASKS
+  // =========================
   const filteredTasks = tasks.filter((task) => {
     if (filter === "active") {
       return !task.completed;
@@ -70,7 +170,9 @@ function Dashboard() {
     return true;
   });
 
-  // Logout
+  // =========================
+  // LOGOUT
+  // =========================
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -80,26 +182,17 @@ function Dashboard() {
 
   return (
     <div className="app-layout">
-
-      {/* Left Sidebar */}
       <Sidebar />
 
-      {/* Main Area */}
       <div className="main-area">
-
-        {/* Top Navigation */}
         <Navbar onLogout={handleLogout} />
 
-        {/* Dashboard Content */}
         <main className="dashboard">
 
-          {/* Page Header */}
+          {/* HEADER */}
           <div className="page-header">
-
             <div>
-              <div className="page-icon">
-                📝
-              </div>
+              <div className="page-icon">📝</div>
 
               <h1>My Tasks</h1>
 
@@ -110,24 +203,211 @@ function Dashboard() {
 
             <button
               className="new-task-button"
-              onClick={() => alert("Create task feature coming in Day 4")}
+              onClick={() => setShowCreateTask(true)}
             >
               + New task
             </button>
-
           </div>
 
-          {/* Filters */}
+          {/* CREATE TASK */}
+          {showCreateTask && (
+            <div className="create-task-modal">
+              <div className="create-task-form">
+
+                <h2>Create New Task</h2>
+
+                <form onSubmit={handleCreateTask}>
+
+                  <input
+                    type="text"
+                    placeholder="Task title"
+                    value={newTask.title}
+                    onChange={(e) =>
+                      setNewTask({
+                        ...newTask,
+                        title: e.target.value,
+                      })
+                    }
+                    required
+                  />
+
+                  <textarea
+                    placeholder="Description"
+                    value={newTask.description}
+                    onChange={(e) =>
+                      setNewTask({
+                        ...newTask,
+                        description: e.target.value,
+                      })
+                    }
+                  />
+
+                  <select
+                    value={newTask.priority}
+                    onChange={(e) =>
+                      setNewTask({
+                        ...newTask,
+                        priority: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="low">
+                      Low
+                    </option>
+
+                    <option value="medium">
+                      Medium
+                    </option>
+
+                    <option value="high">
+                      High
+                    </option>
+                  </select>
+
+                  <input
+                    type="date"
+                    value={newTask.dueDate}
+                    onChange={(e) =>
+                      setNewTask({
+                        ...newTask,
+                        dueDate: e.target.value,
+                      })
+                    }
+                  />
+
+                  <div className="create-task-actions">
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowCreateTask(false)
+                      }
+                    >
+                      Cancel
+                    </button>
+
+                    <button type="submit">
+                      Create Task
+                    </button>
+
+                  </div>
+
+                </form>
+
+              </div>
+            </div>
+          )}
+
+          {/* EDIT TASK */}
+          {editingTask && (
+            <div className="create-task-modal">
+              <div className="create-task-form">
+
+                <h2>Edit Task</h2>
+
+                <form onSubmit={handleEditTask}>
+
+                  <input
+                    type="text"
+                    placeholder="Task title"
+                    value={editingTask.title}
+                    onChange={(e) =>
+                      setEditingTask({
+                        ...editingTask,
+                        title: e.target.value,
+                      })
+                    }
+                    required
+                  />
+
+                  <textarea
+                    placeholder="Description"
+                    value={
+                      editingTask.description || ""
+                    }
+                    onChange={(e) =>
+                      setEditingTask({
+                        ...editingTask,
+                        description: e.target.value,
+                      })
+                    }
+                  />
+
+                  <select
+                    value={
+                      editingTask.priority ||
+                      "medium"
+                    }
+                    onChange={(e) =>
+                      setEditingTask({
+                        ...editingTask,
+                        priority: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="low">
+                      Low
+                    </option>
+
+                    <option value="medium">
+                      Medium
+                    </option>
+
+                    <option value="high">
+                      High
+                    </option>
+                  </select>
+
+                  <input
+                    type="date"
+                    value={
+                      editingTask.dueDate
+                        ? editingTask.dueDate.split("T")[0]
+                        : ""
+                    }
+                    onChange={(e) =>
+                      setEditingTask({
+                        ...editingTask,
+                        dueDate: e.target.value,
+                      })
+                    }
+                  />
+
+                  <div className="create-task-actions">
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setEditingTask(null)
+                      }
+                    >
+                      Cancel
+                    </button>
+
+                    <button type="submit">
+                      Save Changes
+                    </button>
+
+                  </div>
+
+                </form>
+
+              </div>
+            </div>
+          )}
+
+          {/* FILTERS */}
           <TaskFilters
             filter={filter}
             setFilter={setFilter}
           />
 
-          {/* Task Table */}
+          {/* TASK TABLE */}
           <TaskTable
             tasks={filteredTasks}
             onToggle={handleToggleTask}
             onDelete={handleDeleteTask}
+            onEdit={setEditingTask}
           />
 
         </main>
