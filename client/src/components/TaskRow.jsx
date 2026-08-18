@@ -1,14 +1,9 @@
 import React from "react";
 
-function TaskRow({
-  task,
-  onToggle,
-  onDelete,
-  onEdit,
-}) {
+function TaskRow({ task, onToggle, onDelete, onEdit }) {
   return (
     <div className="task-row">
-
+      {/* Task */}
       <div className="task-name">
         <input
           type="checkbox"
@@ -17,13 +12,7 @@ function TaskRow({
         />
 
         <div>
-          <div
-            className={
-              task.completed
-                ? "task-title completed"
-                : "task-title"
-            }
-          >
+          <div className="task-title">
             {task.title}
           </div>
 
@@ -35,47 +24,48 @@ function TaskRow({
         </div>
       </div>
 
+      {/* Priority */}
       <div className="task-priority">
-        <span
-          className={`priority ${task.priority}`}
-        >
+        <span className={`priority ${task.priority || "medium"}`}>
           {task.priority || "medium"}
         </span>
       </div>
 
-      <div className="task-status">
-        {task.completed
-          ? "Completed"
-          : "Active"}
+      {/* Category */}
+      <div className="task-category">
+        {task.category || "General"}
       </div>
 
+      {/* Status */}
+      <div className="task-status">
+        {task.completed ? "Completed" : "Active"}
+      </div>
+
+      {/* Due Date */}
       <div className="task-date">
         {task.dueDate
-          ? new Date(
-              task.dueDate
-            ).toLocaleDateString()
+          ? new Date(task.dueDate).toLocaleDateString()
           : "No date"}
       </div>
 
+      {/* Actions */}
       <div className="task-actions">
+        <button
+          type="button"
+          className="edit-button"
+          onClick={() => onEdit(task)}
+        >
+          Edit
+        </button>
 
-  <button
-    onClick={() => onEdit(task)}
-    className="edit-button"
-  >
-    Edit
-  </button>
-
-  <button
-    onClick={() => onDelete(task._id)}
-    className="delete-button"
-    title="Delete task"
-  >
-    🗑
-  </button>
-
-</div>
-
+        <button
+          type="button"
+          className="task-delete-button"
+          onClick={() => onDelete(task._id)}
+        >
+          🗑
+        </button>
+      </div>
     </div>
   );
 }

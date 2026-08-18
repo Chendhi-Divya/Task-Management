@@ -4,21 +4,21 @@ function TaskFilters({ filter, setFilter }) {
   return (
     <div className="task-filters">
       <button
-        className={filter === "all" ? "filter active" : "filter"}
+        className={filter === "all" ? "active" : ""}
         onClick={() => setFilter("all")}
       >
         All
       </button>
 
       <button
-        className={filter === "active" ? "filter active" : "filter"}
+        className={filter === "active" ? "active" : ""}
         onClick={() => setFilter("active")}
       >
         Active
       </button>
 
       <button
-        className={filter === "completed" ? "filter active" : "filter"}
+        className={filter === "completed" ? "active" : ""}
         onClick={() => setFilter("completed")}
       >
         Completed

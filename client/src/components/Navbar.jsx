@@ -1,6 +1,6 @@
 import React from "react";
 
-function Navbar({ onLogout }) {
+function Navbar({ onLogout, search, setSearch }) {
   const storedUser = localStorage.getItem("user");
 
   let user = null;
@@ -26,21 +26,36 @@ function Navbar({ onLogout }) {
   return (
     <header className="navbar">
 
+      {/* =========================
+          SEARCH
+      ========================= */}
       <div className="search-box">
+
         <span>🔍</span>
 
         <input
           type="text"
           placeholder="Search tasks..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
+
       </div>
 
+      {/* =========================
+          RIGHT SIDE
+      ========================= */}
       <div className="navbar-right">
 
-        <button className="icon-button">
+        {/* NOTIFICATION */}
+        <button
+          type="button"
+          className="icon-button"
+        >
           🔔
         </button>
 
+        {/* USER */}
         <div className="user-menu">
 
           <div className="avatar">
@@ -52,6 +67,7 @@ function Navbar({ onLogout }) {
           </span>
 
           <button
+            type="button"
             className="logout-button"
             onClick={onLogout}
           >
